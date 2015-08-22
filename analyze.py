@@ -11,6 +11,8 @@ ITEMS = {}
 NUM_GAMES = 100
 
 BOOTS = set([3006, 3009, 3020, 3047, 3111, 3117, 3158])
+CONSUMABLES = set(range(3340, 3343) + range(3361, 3365) + [2043, 2044, 2003, 2004]) 
+JUNGLE_ITEMS
 
 def convert(dictionary):
     return namedtuple('GenericDict', dictionary.keys())(**dictionary)
@@ -264,6 +266,8 @@ def normalize_item(item_id):
 		return int(item.made_from[0])
 	elif 'Consumable' in item.tags:
 		return None
+	elif item_id in CONSUMABLES:
+		return None
 	elif len(item.into) > 0:
 
 
@@ -276,7 +280,7 @@ def normalize_item(item_id):
 def get_role_items():
 
 	data = defaultdict(lambda: {'jungle': defaultdict(lambda: 0.01), 'support': defaultdict(lambda: 0.01), 'carry': defaultdict(lambda: 0.01), 'total': 0.01})
-	for i in xrange(100):
+	for i in xrange(10):
 		print i
 		games = get_games(i * NUM_GAMES, NUM_GAMES)
 		for g in games:
@@ -284,8 +288,6 @@ def get_role_items():
 
 			for p in g['participants']:
 				role = roles[p['participantId']]
-
-				# if p['championId'] == 421 and role == 'carry':
 
 				for i in xrange(7):
 					item_id = p['stats']['item%d' % i] 
@@ -315,6 +317,25 @@ def get_role_items():
 					continue
 				item = ITEMS[item_id]
 				print "\t\t%s: %.2f" % (item.name, data[champ_id][role][item_id] / data[champ_id][role]['total'])
+
+def get_starting_items():
+	data = defaultdict(lambda: {'jungle': defaultdict(lambda: 0.01), 'support': defaultdict(lambda: 0.01), 'carry': defaultdict(lambda: 0.01), 'total': 0.01})
+	for i in xrange(10):
+		print i
+		games = get_games(i * NUM_GAMES, NUM_GAMES)
+		for g in games:
+			roles = get_role_type(g)
+
+			for p in g['participants']:
+				role = roles[p['participantId']]
+
+			for frame in g['timeline']['frames']:
+				if frame['timestamp'] > 120000:
+					break
+				if 'events' not in frame:
+					continue
+				for event in frame['events']:
+
 
 load_champions()
 load_items()

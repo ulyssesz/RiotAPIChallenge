@@ -1,0 +1,42 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="championComponent.html">
+<link rel="import" href="scripts/polymer/paper-styles/paper-styles.html">
+
+<dom-module id="champion-list">
+    <style>
+        div {
+            font-family: 'Roboto', sans-serif;
+            font-size: 50px;
+        }
+    </style>
+    <template>
+        <paper-card class="champion-list" heading="Champions">
+            <template is="dom-repeat"
+                items="{{champions}}">
+                <champion-component championName="{{item.x}}">
+            </template>
+        </paper-card>
+        <iron-ajax
+            auto
+            url="../data/champions.json"
+            handle-as="json"
+            on-response="handleResponse"></iron-ajax>
+    </template>
+    <script>
+        Polymer({
+            is: 'champion-list',
+            ready: function() {
+            },
+
+            handleResponse: function(e, request) {
+                
+                this.champions = request.response.map(function(name) {
+                    return {"x": name};
+                });
+                console.log(this.champions);
+            }
+        });
+    </script>
+</dom-module>

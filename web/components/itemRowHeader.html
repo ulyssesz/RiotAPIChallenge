@@ -1,0 +1,26 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="item-row-header">
+    <style>
+        div {
+            font-family: 'Roboto', sans-serif;            
+            margin-bottom: 10px;
+        }
+    </style>
+    <template>
+        <div class="item-row-header">
+            <span>[[rowname]]</span>
+        </div>
+    </template>
+    <script>
+        Polymer({
+            is: 'item-row-header',
+            properties: {
+                rowName: {
+                    type: String,
+                    value: "Row name"
+                }
+            }
+        });
+    </script>
+</dom-module>

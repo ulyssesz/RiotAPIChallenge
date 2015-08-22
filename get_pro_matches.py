@@ -11,7 +11,7 @@ KEY = '0d91fe97-9666-4e0b-86ff-e5c3a108db0d'
 RATE_LIMITS = (RateLimit(3000, 10), RateLimit(180000, 600))
 NUM_GAMES = 100
 
-REGION = "EUW"
+REGION = "PRO"
 
 watcher = RiotWatcher(KEY, limits = RATE_LIMITS, default_region=EUROPE_WEST)
 
@@ -72,7 +72,25 @@ def get_match_ids():
 	with open(os.path.join("data", "pro_matches_%s.json" % REGION), 'wb') as outfile:
 		json.dump(list(match_ids), outfile)
 
-get_player_ids()
-get_match_ids()
+def get_games(start, count):
+	filename = os.path.join("data", '%s-%d.json' % (REGION, start))
+	with open(filename) as infile:
+		x = json.load(infile)
+	return x
+
+def filter_matches():
+	t = defaultdict(int)
+	for i in xrange(100):
+		print i
+		games = get_games(i * NUM_GAMES, NUM_GAMES)
+		for g in games:
+			
+			t[g['queueType']] += 1
+	print t
+
+# get_player_ids()
+# get_match_ids()
+# filter_matches()
+
 
 

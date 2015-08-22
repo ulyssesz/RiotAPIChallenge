@@ -1,0 +1,111 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-styles/paper-styles.html">
+<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="itemRowHeader.html">
+<link rel="import" href="itemList.html">
+
+
+<dom-module id="item-set-list">
+    <style>
+        paper-card {
+            --paper-card-header: {
+                width: 400px;
+                height: 100px;
+                display: inline-block;
+            };
+
+            --paper-card-content: {
+                padding: 0px 4px 10px 4px;
+            };
+        }
+
+        
+
+        .tab-disabled {
+            color: lightgrey;
+        }
+
+        paper-tab {
+            --paper-tab-ink: var(--paper-blue-grey-100);
+        }
+
+        paper-tabs {
+            --paper-tabs-selection-bar-color: var(--paper-blue-grey-100);
+            margin-bottom: 20px;
+        }
+
+        div {
+            font-family: 'Roboto', sans-serif;            
+            margin-bottom: 10px;
+        }
+
+        .bottom-toolbar {
+            height: 40px;
+            padding: 0px 10px;
+        }
+
+        .toggle-label {
+            margin-top: 15px;
+            display: inline-block;
+        }
+
+        .download-button {
+            float: right;
+        }
+
+        .line-separator {
+            height: 1px;
+            border-bottom: 1px solid var(--paper-grey-200);
+        }
+
+    </style>
+    <template>
+        <paper-card heading="Draven" 
+                    class="item-set-list"
+                    image="http://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aatrox_0.jpg">
+            <div class="card-content">
+                <paper-tabs> 
+                    <paper-tab>Carry</paper-tab>
+                    <paper-tab>Support</paper-tab>
+                    <!-- <div class="tab-disabled tab-content flex-auto center-center horizontal layout style-scope paper-tab">Support</div> -->
+                    <paper-tab>Jungle</paper-tab>
+                </paper-tabs>
+                <template is="dom-repeat"
+                    items="{{itemBlocks}}">
+                    
+                    <item-row-header rowName="{{item.type}}"></item-row-header>
+                    <item-list itemsList="{{item.items}}"></item-list>
+                </template>
+                <div class="line-separator"></div>
+                <div class="bottom-toolbar">
+                    <paper-toggle-button checked></paper-toggle-button>
+                    <div class="toggle-label">show JSON</div>
+                    <paper-button raised class="download-button">
+                        <iron-icon icon="file-download"></iron-icon>
+                        download
+                    </paper-button>
+                </div>
+            </div>
+        </paper-card>
+        <iron-ajax
+            auto
+            url="../data/sample.json"
+            handle-as="json"
+            on-response="handleResponse"></iron-ajax>
+    </template>
+    <script>
+        Polymer({
+            is: 'item-set-list',
+
+            handleResponse: function(e, request) {
+                console.log(request.response);
+                this.itemBlocks = request.response.blocks;
+            }
+        });
+    </script>
+</dom-module>

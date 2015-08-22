@@ -1,0 +1,32 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+
+<dom-module id="champion-component">
+    <style>
+        iron-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 40px;
+        }
+    </style>
+    <template>
+        <iron-image 
+            src="{{formatUrl(championname)}}" preload fade sizing="cover"></iron-image>
+    </template>
+    <script>
+        Polymer({
+            is: 'champion-component',
+            properties: {
+                championName: {
+                    type: String,
+                    value: "Draven"
+                }                
+            },
+
+            formatUrl: function(name) {
+                console.log(name);
+                return "http://ddragon.leagueoflegends.com/cdn/5.7.1/img/champion/" + name + ".png";
+            }
+        });
+    </script>
+</dom-module>

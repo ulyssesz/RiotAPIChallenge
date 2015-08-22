@@ -1,0 +1,26 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="itemComponent.html">
+
+<dom-module id="item-list">
+    <style>
+        
+    </style>
+    <template>
+        <div class="item-list">
+            <template is="dom-repeat"
+                items="{{itemslist}}">
+                <item-component itemId="{{item.id}}">
+            </template>
+        </div>
+    </template>
+    <script>
+        Polymer({
+            is: 'item-list',
+            properties: {
+                itemsList: {
+                    type: Array
+                }
+            }
+        });
+    </script>
+</dom-module>
