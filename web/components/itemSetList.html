@@ -9,23 +9,35 @@
 <link rel="import" href="itemRowHeader.html">
 <link rel="import" href="itemList.html">
 
-
 <dom-module id="item-set-list">
     <style>
+        :host {
+            display: inline-block;
+            max-width: 400px;
+            height: 100%;
+        }
+
         paper-card {
+            --paper-card: {
+                height: 300px;
+            };
+
             --paper-card-header: {
-                width: 400px;
-                height: 100px;
+                width: 100%;
+                height: 150px;
                 display: inline-block;
+                overflow: hidden;
             };
 
             --paper-card-content: {
                 padding: 0px 4px 10px 4px;
+                height: 300px;
+                overflow: auto;
             };
+
+            
         }
-
         
-
         .tab-disabled {
             color: lightgrey;
         }
@@ -44,9 +56,37 @@
             margin-bottom: 10px;
         }
 
+        .title-background {
+            position: absolute;
+            top: 80px;
+            left: 0px;
+            width: 100%;
+            height: 70px;
+
+            background: -webkit-linear-gradient(transparent, black); /* For Safari 5.1 to 6.0 */
+            background: -o-linear-gradient(transparent, black); /* For Opera 11.1 to 12.0 */
+            background: -moz-linear-gradient(transparent, black); /* For Firefox 3.6 to 15 */
+            background: linear-gradient(transparent, black); /* Standard syntax */
+        }
+
+        .title-background span {
+            display: inline-block;
+            margin: 32px 0 0 16px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 24px;
+            font-weight: 500;
+            color: white;
+        }
+
+        /*--paper-card-header-text: {
+                
+                color: white;
+        };*/
+
         .bottom-toolbar {
             height: 40px;
             padding: 0px 10px;
+            float: bottom;
         }
 
         .toggle-label {
@@ -63,24 +103,42 @@
             border-bottom: 1px solid var(--paper-grey-200);
         }
 
+        .item-blocks {
+            overflow: auto;
+        }
+
     </style>
     <template>
-        <paper-card heading="Draven" 
+        <paper-card heading="" 
                     class="item-set-list"
-                    image="http://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aatrox_0.jpg">
+                    image="{{splashArt}}">
+            <div class="title-background">
+                <span>{{championSelected}}</span>
+            </div>
             <div class="card-content">
                 <paper-tabs> 
-                    <paper-tab>Carry</paper-tab>
-                    <paper-tab>Support</paper-tab>
-                    <!-- <div class="tab-disabled tab-content flex-auto center-center horizontal layout style-scope paper-tab">Support</div> -->
-                    <paper-tab>Jungle</paper-tab>
-                </paper-tabs>
-                <template is="dom-repeat"
-                    items="{{itemBlocks}}">
                     
-                    <item-row-header rowName="{{item.type}}"></item-row-header>
-                    <item-list itemsList="{{item.items}}"></item-list>
-                </template>
+                    <paper-tab hidden$="{{!hasBuild(championSelected, 'carry')}}">Carry</paper-tab>
+                    <div class="tab-disabled tab-content flex-auto center-center horizontal layout style-scope paper-tab"
+                         hidden$="{{hasBuild(championSelected, 'carry')}}">Carry</div>
+
+                    <paper-tab hidden$="{{!hasBuild(championSelected, 'support')}}">Support</paper-tab>
+                    <div class="tab-disabled tab-content flex-auto center-center horizontal layout style-scope paper-tab"
+                         hidden$="{{hasBuild(championSelected, 'support')}}">Support</div>
+                    
+                    <paper-tab hidden$="{{!hasBuild(championSelected, 'jungle')}}">Jungle</paper-tab>
+                    <div class="tab-disabled tab-content flex-auto center-center horizontal layout style-scope paper-tab"
+                         hidden$="{{hasBuild(championSelected, 'jungle')}}">Jungle</div>
+
+                </paper-tabs>
+                <div class="item-blocks">
+                    <template is="dom-repeat"
+                        items="{{itemBlocks}}">
+                        
+                        <item-row-header rowName="{{item.type}}"></item-row-header>
+                        <item-list itemsList="{{item.items}}"></item-list>
+                    </template>
+                </div>
                 <div class="line-separator"></div>
                 <div class="bottom-toolbar">
                     <paper-toggle-button checked></paper-toggle-button>
@@ -94,17 +152,70 @@
         </paper-card>
         <iron-ajax
             auto
-            url="../data/sample.json"
+            url="../data/results/available_builds.json"
             handle-as="json"
             on-response="handleResponse"></iron-ajax>
+        <iron-ajax
+            auto
+            url="{{getURL(championSelected, build)}}"
+            handle-as="json"
+            on-response="onReceiveBuild"></iron-ajax>
+        <iron-ajax
+            auto
+            url="../data/results/champion_info.json"
+            handle-as="json"
+            on-response="handleChampionInfo"></iron-ajax>
     </template>
     <script>
         Polymer({
             is: 'item-set-list',
+            properties: {
+                championSelected: {
+                    type: String,
+                    observer: "championSelectedChanged",
+                    reflect: true,
+                    notify: true
+                },
+
+                build: {
+                    type: String,
+                    value: "carry"
+                }
+            },
+
+            championSelectedChanged: function(n, o) {
+                if (this.championInfo != undefined) {
+                    this.splashArt = this.championInfo[n].splash_url;
+                }
+                
+            },
 
             handleResponse: function(e, request) {
-                console.log(request.response);
+                this.availableBuilds = request.response;
+                this.championSelected = "Darius";
+            },
+
+            handleChampionInfo: function(e, request) {
+                this.championInfo = request.response.art;
+                this.championSelected = "Draven";
+            },
+
+            getURL: function(championSelected, build) {
+                console.log("get url");
+                return "../data/results/" + championSelected + "_" + build + ".json"
+            },
+
+            onReceiveBuild: function(e, request) {
+                console.log("Res", request.response);
                 this.itemBlocks = request.response.blocks;
+            },
+
+            hasBuild: function(championSelected, role) {
+                if (this.availableBuilds == undefined || !this.availableBuilds.hasOwnProperty(championSelected)) {
+                    return false;
+                }
+
+                return this.availableBuilds[championSelected].indexOf(role) > -1;
             }
         });
     </script>

@@ -1,0 +1,42 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="championList.html">
+<link rel="import" href="itemSetList.html">
+
+<dom-module id="page-component">
+    <style>
+        :host {
+            display: block;
+            width: 900px;
+            margin: 0 auto;
+        }
+
+        champion-list, item-set-list {
+            max-height: 700px;
+            margin: 10px;
+        }
+
+    </style>
+    <template>
+        <champion-list index="{{championSelected}}"></champion-list>
+        <item-set-list champion-selected="{{championSelected}}"></item-set-list>
+    </template>
+    <script>
+        Polymer({
+            is: 'page-component',
+            properties: {
+                championSelected: {
+                    type: String,
+                    observer: 'championSelectedChanged'
+                }
+            },
+
+            championSelectedChanged: function(n, o) {
+                console.log("other", n);
+            },
+
+            ready: function() {
+                this.championSelected = "Draven";
+            }
+        });
+    </script>
+</dom-module>
