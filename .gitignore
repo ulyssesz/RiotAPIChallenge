@@ -3,3 +3,4 @@ BILGEWATER/*
 web/bower_components/*
 web/data/*
 output/*
+.DS_Store?

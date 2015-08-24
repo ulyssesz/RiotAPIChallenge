@@ -19,7 +19,7 @@
 
         paper-card {
             --paper-card: {
-                height: 300px;
+                width: 100%;
             };
 
             --paper-card-header: {
@@ -31,7 +31,7 @@
 
             --paper-card-content: {
                 padding: 0px 4px 10px 4px;
-                height: 300px;
+                height: 435px;
                 overflow: auto;
             };
 
@@ -78,11 +78,6 @@
             color: white;
         }
 
-        /*--paper-card-header-text: {
-                
-                color: white;
-        };*/
-
         .bottom-toolbar {
             height: 40px;
             padding: 0px 10px;
@@ -116,7 +111,7 @@
                 <span>{{championSelected}}</span>
             </div>
             <div class="card-content">
-                <paper-tabs> 
+                <paper-tabs selected="{{selectedIndex}}"> 
                     
                     <paper-tab hidden$="{{!hasBuild(championSelected, 'carry')}}">Carry</paper-tab>
                     <div class="tab-disabled tab-content flex-auto center-center horizontal layout style-scope paper-tab"
@@ -131,7 +126,7 @@
                          hidden$="{{hasBuild(championSelected, 'jungle')}}">Jungle</div>
 
                 </paper-tabs>
-                <div class="item-blocks">
+                <div class="item-blocks" hidden$="{{showJSON}}">
                     <template is="dom-repeat"
                         items="{{itemBlocks}}">
                         
@@ -140,8 +135,13 @@
                     </template>
                 </div>
                 <div class="line-separator"></div>
+                <pre hidden$="{{!showJSON}}"><code id="code" class="json">
+                    <p>{{championSelected}}</p>
+                </code></pre>
+            </div>
+            <div class="card-actions">
                 <div class="bottom-toolbar">
-                    <paper-toggle-button checked></paper-toggle-button>
+                    <paper-toggle-button></paper-toggle-button>
                     <div class="toggle-label">show JSON</div>
                     <paper-button raised class="download-button">
                         <iron-icon icon="file-download"></iron-icon>
@@ -180,14 +180,52 @@
                 build: {
                     type: String,
                     value: "carry"
-                }
+                },
+
+                selectedIndex: {
+                    type: Number,
+                    value: 0,
+                    observer: "roleChanged"
+                },
+                
+                showJSON: {
+                    value: false
+                } 
+            },
+
+            created: function() {
+                this.roles = ['carry', 'support', 'jungle'];
+            },
+
+            attached: function() {
+                var toggleButton = document.querySelector('paper-toggle-button');
+                var that = this;
+                toggleButton.addEventListener('iron-change', function(e) {
+                    that.showJSON = toggleButton.checked;                    
+                });
             },
 
             championSelectedChanged: function(n, o) {
                 if (this.championInfo != undefined) {
                     this.splashArt = this.championInfo[n].splash_url;
+
+                    for (var i = 0, len = this.roles.length; i < len; i++) {
+                        if (this.hasBuild(n, this.roles[i])) {
+                            this.selectedIndex = i;
+                            break;
+                        }
+                    }
                 }
                 
+            },
+
+            roleChanged: function(n, o) {
+                this.build = this.roles[n];
+                if (n == 0) {
+                    this.showjson = false;
+                } else {
+                    this.showjson = true;
+                }
             },
 
             handleResponse: function(e, request) {
@@ -206,7 +244,10 @@
             },
 
             onReceiveBuild: function(e, request) {
-                console.log("Res", request.response);
+                this.json = JSON.stringify(request.response, null, '\t');
+                
+                this.$.code.textContent = this.json;
+                hljs.highlightBlock(this.$.code);
                 this.itemBlocks = request.response.blocks;
             },
 

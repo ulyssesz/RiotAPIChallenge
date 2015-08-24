@@ -9,12 +9,26 @@
     <style>
         :host {
             display: inline-block;
-            width: 400px;
+            max-width: 550px;
             vertical-align: top;
         }
 
         paper-card {
-            width: 100%;
+            --paper-card-header-text: {
+                font-family: 'Roboto', sans-serif;
+                color: black;
+            };
+            
+            --paper-card: {
+                height: 100%;
+                width: 100%;
+            };
+
+            --paper-card-content: {
+                padding: 0px 4px 10px 4px;
+                max-height: 600px;
+                overflow: auto;
+            };
         }     
 
         div {
@@ -37,6 +51,7 @@
     </style>
     <template>
         <paper-card class="champion-list" heading="Champions">
+            <div class="card-content">
             <iron-selector  attr-for-selected="championname"
                             selected="{{index}}">
                 <template is="dom-repeat"
@@ -44,6 +59,7 @@
                     <champion-component championName="{{item}}" championIcon="{{getIcon(item)}}">
                 </template>
             </iron-selector>
+            </div>
         </paper-card>
         <iron-ajax
             auto
