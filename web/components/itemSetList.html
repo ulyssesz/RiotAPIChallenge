@@ -30,12 +30,24 @@
             };
 
             --paper-card-content: {
-                padding: 0px 4px 10px 4px;
-                height: 435px;
-                overflow: auto;
+                padding: 0px 4px 0px 4px;
             };
 
-            
+            --paper-card-actions: {
+                height: 50px;
+            }
+        }
+
+        .item-blocks {
+            height: 390px;
+            padding: 20px 10px 0px 10px;
+            overflow: auto;
+        }
+
+        .code-container {
+            height: 390px;
+            margin: 10px;
+            overflow: auto;
         }
         
         .tab-disabled {
@@ -48,12 +60,10 @@
 
         paper-tabs {
             --paper-tabs-selection-bar-color: var(--paper-blue-grey-100);
-            margin-bottom: 20px;
         }
 
         div {
             font-family: 'Roboto', sans-serif;            
-            margin-bottom: 10px;
         }
 
         .title-background {
@@ -102,6 +112,10 @@
             overflow: auto;
         }
 
+        .hello{
+            color: red;
+        }
+
     </style>
     <template>
         <paper-card heading="" 
@@ -111,20 +125,13 @@
                 <span>{{championSelected}}</span>
             </div>
             <div class="card-content">
-                <paper-tabs selected="{{selectedIndex}}"> 
-                    
-                    <paper-tab hidden$="{{!hasBuild(championSelected, 'carry')}}">Carry</paper-tab>
-                    <div class="tab-disabled tab-content flex-auto center-center horizontal layout style-scope paper-tab"
-                         hidden$="{{hasBuild(championSelected, 'carry')}}">Carry</div>
-
-                    <paper-tab hidden$="{{!hasBuild(championSelected, 'support')}}">Support</paper-tab>
-                    <div class="tab-disabled tab-content flex-auto center-center horizontal layout style-scope paper-tab"
-                         hidden$="{{hasBuild(championSelected, 'support')}}">Support</div>
-                    
-                    <paper-tab hidden$="{{!hasBuild(championSelected, 'jungle')}}">Jungle</paper-tab>
-                    <div class="tab-disabled tab-content flex-auto center-center horizontal layout style-scope paper-tab"
-                         hidden$="{{hasBuild(championSelected, 'jungle')}}">Jungle</div>
-
+                <paper-tabs selected="{{selectedIndex}}">                     
+                    <paper-tab  class$="{{getClass(championSelected, 'carry')}}" 
+                                disabled$="{{!hasBuild(championSelected, 'carry')}}">Carry</paper-tab>
+                    <paper-tab  class$="{{getClass(championSelected, 'support')}}" 
+                                disabled$="{{!hasBuild(championSelected, 'support')}}">Support</paper-tab>
+                    <paper-tab  class$="{{getClass(championSelected, 'jungle')}}" 
+                                disabled$="{{!hasBuild(championSelected, 'jungle')}}">Jungle</paper-tab>
                 </paper-tabs>
                 <div class="item-blocks" hidden$="{{showJSON}}">
                     <template is="dom-repeat"
@@ -135,7 +142,7 @@
                     </template>
                 </div>
                 <div class="line-separator"></div>
-                <pre hidden$="{{!showJSON}}"><code id="code" class="json">
+                <pre class="code-container" hidden$="{{!showJSON}}"><code id="code" class="json">
                     <p>{{championSelected}}</p>
                 </code></pre>
             </div>
@@ -257,6 +264,15 @@
                 }
 
                 return this.availableBuilds[championSelected].indexOf(role) > -1;
+            },
+
+            getClass: function(championSelected, role) {
+                if (this.hasBuild(championSelected, role)) {
+                    return ""    
+                } else {
+                    return "tab-disabled";
+                }
+                
             }
         });
     </script>
