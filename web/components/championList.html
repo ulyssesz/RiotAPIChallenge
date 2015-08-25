@@ -36,11 +36,6 @@
             font-size: 50px;
         }
 
-        .iron-selected {
-            
-            border-color: #505252;
-        }
-
         champion-component {
             margin: 5px;
             border-style: solid;
@@ -52,11 +47,12 @@
     <template>
         <paper-card class="champion-list" heading="Champions">
             <div class="card-content">
-            <iron-selector  attr-for-selected="championname"
-                            selected="{{index}}">
+            <iron-selector  attr-for-selected="championName"
+                            selected="{{selectedIndex}}">
                 <template is="dom-repeat"
                     items="{{filteredChampions}}">
-                    <champion-component championName="{{item}}" championIcon="{{getIcon(item)}}">
+                    <champion-component champion-name="{{item}}" championIcon="{{getIcon(item)}}"
+                                        champion-selected="{{isChampionSelected(index, selectedIndex)}}">
                 </template>
             </iron-selector>
             </div>
@@ -71,7 +67,8 @@
         Polymer({
             is: 'champion-list',
             properties: {
-                index: {
+                selectedIndex: {
+                    value: "",
                     type: String,
                     notify: true,
                     reflectToAttribute: true,
@@ -95,6 +92,10 @@
 
             getIcon: function(championName) {
                 return this.championInfo[championName].icon_url;
+            },
+
+            isChampionSelected: function(index, selectedIndex) {
+                return this.selectedIndex == this.filteredChampions[index];
             }
         });
     </script>

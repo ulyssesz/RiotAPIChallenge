@@ -6,6 +6,7 @@
     <style>
         :host {
             display: inline-block;
+            position: relative;
             width: 60px;
             height: 60px;
         }
@@ -15,10 +16,47 @@
             height: 100%;
             border-radius: 30px;
         }
+
+        .overlay {
+            display: inline-block;
+            position: absolute;
+            top: 0px;
+            bottom: 0px;
+            width: 60px;
+            height: 60px;
+            border-radius: 30px;
+            background: var(--paper-blue-800);
+            opacity: 0;
+        }
+
+        .overlay.shown {
+            opacity: 0.5;
+        }
+
+        span {
+            font-size: 10px;
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        span.shown {
+            opacity: 1;
+        }
     </style>
     <template>
         <iron-image 
             src="{{championicon}}" preload fade sizing="cover"></iron-image>
+        <div class$="{{shouldShowOverlay(showOverlay, championSelected)}}"
+             on-mouseover="onHover"
+             on-mouseout="onUnhover">
+             
+        </div>
+        <span class$="{{shouldShowText(showOverlay, championSelected)}}">{{championName}}</span>
     </template>
     <script>
         Polymer({
@@ -27,11 +65,50 @@
                 championIcon: {
                     type: String,
                     value: "http://ddragon.leagueoflegends.com/cdn/5.7.1/img/champion/Draven.png"
-                }                
+                },
+
+                showOverlay: {
+                    value: false
+                },
+
+                championName: {
+                    type: String,
+                    value: "Draven"
+                },
+
+                championSelected: {
+                    type: Boolean,
+                    value: false
+                }
             },
 
             onIconClick: function() {
                 console.log("helo");
+            },
+
+            onHover: function() {
+                this.showOverlay = true;
+            },
+
+            onUnhover: function() {
+                this.showOverlay = false;
+            },
+            
+            shouldShowOverlay: function(x) {
+                if (this.showOverlay || this.championSelected) {
+                    return "overlay shown";
+                } else {
+                    return "overlay";
+                }
+            },
+
+            shouldShowText: function(x, y) {
+                // console.log("show", this.championSelected, this.championName);
+                if (this.showOverlay || this.championSelected) {
+                    return "shown";
+                } else {
+                    return "";
+                }
             }
         });
     </script>
