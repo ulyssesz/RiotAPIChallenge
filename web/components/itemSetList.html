@@ -250,7 +250,7 @@
             },
 
             onReceiveBuild: function(e, request) {
-                this.json = JSON.stringify(request.response, null, '\t');
+                this.json = JSON.stringify(request.response, null, '  ');
                 
                 this.$.code.textContent = this.json;
                 hljs.highlightBlock(this.$.code);

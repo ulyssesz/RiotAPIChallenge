@@ -1,11 +1,15 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-toolbar/paper-toolbar.html">
 <link rel="import" href="championList.html">
 <link rel="import" href="itemSetList.html">
 
 <dom-module id="page-component">
     <style>
         :host {
-            display: block;
+            display: block; 
+        }
+
+        .container {
             width: 1000px;
             margin: 0 auto;
         }
@@ -17,8 +21,14 @@
 
     </style>
     <template>
-        <champion-list selected-index="{{championSelected}}"></champion-list>
-        <item-set-list champion-selected="{{championSelected}}"></item-set-list>
+        <paper-toolbar>
+            <paper-icon-button icon="menu" on-tap="menuAction"></paper-icon-button>
+            <div class="title">Build like the pros</div>
+        </paper-toolbar>
+        <div class="container">
+            <champion-list selected-index="{{championSelected}}"></champion-list>
+            <item-set-list champion-selected="{{championSelected}}"></item-set-list>
+        </div>
     </template>
     <script>
         Polymer({
