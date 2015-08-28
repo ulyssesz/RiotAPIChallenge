@@ -8,6 +8,7 @@
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="itemRowHeader.html">
 <link rel="import" href="itemList.html">
+<link rel="import" href="myCard.html">
 
 <dom-module id="item-set-list">
     <style>
@@ -17,9 +18,10 @@
             height: 100%;
         }
 
-        paper-card {
+        my-card {
             --paper-card: {
                 width: 100%;
+                height: 100%;
             };
 
             --paper-card-header: {
@@ -31,11 +33,16 @@
 
             --paper-card-content: {
                 padding: 0px 4px 0px 4px;
+                height: calc(100% - 211px);
             };
 
             --paper-card-actions: {
                 height: 50px;
-            }
+            };
+
+            --paper-card-material: {
+                height: 100%;
+            };
         }
 
         .item-blocks {
@@ -45,7 +52,7 @@
         }
 
         .code-container {
-            height: 390px;
+            height: calc(100% - 70px);
             margin: 10px;
             overflow: auto;
         }
@@ -110,6 +117,7 @@
 
         .item-blocks {
             overflow: auto;
+            height: calc(100% - 70px);
         }
 
         .hello{
@@ -118,7 +126,8 @@
 
     </style>
     <template>
-        <paper-card heading="" 
+        <my-card    heading="" 
+                    elevation="3"
                     class="item-set-list"
                     image="{{splashArt}}">
             <div class="title-background">
@@ -156,7 +165,7 @@
                     </paper-button>
                 </div>
             </div>
-        </paper-card>
+        </my-card>
         <iron-ajax
             auto
             url="../data/results/available_builds.json"

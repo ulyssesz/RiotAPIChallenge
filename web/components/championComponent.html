@@ -15,7 +15,6 @@
             width: 100%;
             height: 100%;
             border-radius: 30px;
-            background: blue;
         }
 
         .overlay {
@@ -51,7 +50,7 @@
     </style>
     <template>
         <iron-image 
-            src="{{}}" preload fade sizing="cover"></iron-image>
+            src="{{championicon}}" preload fade sizing="cover"></iron-image>
         <div class$="{{shouldShowOverlay(showOverlay, championSelected)}}"
              on-mouseover="onHover"
              on-mouseout="onUnhover">
