@@ -3,6 +3,7 @@
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="championComponent.html">
+<link rel="import" href="myCard.html">
 
 
 <dom-module id="champion-list">
@@ -11,9 +12,10 @@
             display: inline-block;
             max-width: 550px;
             vertical-align: top;
+            height: 100%;
         }
 
-        paper-card {
+        my-card {
             --paper-card-header-text: {
                 font-family: 'Roboto', sans-serif;
                 color: black;
@@ -25,11 +27,19 @@
             };
 
             --paper-card-content: {
-                padding: 0px 4px 10px 4px;
-                max-height: 600px;
+                padding: 0px 4px 0px 4px;
+                height: calc(100% - 64px);
                 overflow: auto;
             };
+
+            --paper-card-material: {
+                height: 100%;
+            };
         }     
+
+        #shadow {
+            height: 200px;
+        }
 
         div {
             font-family: 'Roboto', sans-serif;
@@ -43,9 +53,15 @@
             border-width: 4px;
             border-color: white;
         }
+
+        iron-selector {
+            height: 100%;
+            overflow: auto;
+        }
+
     </style>
     <template>
-        <paper-card class="champion-list" heading="Champions">
+        <my-card class="champion-list" heading="Champions">
             <div class="card-content">
             <iron-selector  attr-for-selected="championName"
                             selected="{{selectedIndex}}">
@@ -56,7 +72,7 @@
                 </template>
             </iron-selector>
             </div>
-        </paper-card>
+        </my-card>
         <iron-ajax
             auto
             url="../data/results/champion_info.json"
