@@ -1,6 +1,6 @@
 import json
 import os.path
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 
 ROLES = ['support', 'carry', 'jungle']
 DMG_TYPES = ['ad', 'ap']
@@ -60,39 +60,35 @@ for champ_id, champ in CHAMPIONS.iteritems():
 
         available_builds[champ.name].append(role)
 
-        item_set = {
-            "title": "%s: %s" % (champ.name, role),
-            "type": "custom",
-            "map": "any",
-            "mode": "any",
-            "priority": False,
-            "sortrank": 0,
-            "blocks": []
-        }
-
+        orderedDict = OrderedDict()
+        orderedDict["title"] = "%s: %s" % (champ.name, role)
+        orderedDict["type"] = "custom"
+        orderedDict["map"] = "SR"
+        orderedDict["mode"] = "any"
+        orderedDict["blocks"] = []
+            
         # Starting items
-        items = [{"id": str(item_id), "count": count} for item_id, count in starting_items[champ_id][role][0][1]]
-        item_set['blocks'].append({
-            "type": "Starting items",
-            "items": items
-        })
+        items = [OrderedDict([("id", str(item_id)), ("count", count)]) for item_id, count in starting_items[champ_id][role][0][1]]
+        items_dict = OrderedDict([("type", "Starting items"), ("items", items)])
+        orderedDict['blocks'].append(items_dict)
 
         # Ending items
         end_items = ending_items[champ_id][role]
         normalized_end_items = sorted([(count / total_games_in_role * 100, item_id) for item_id, count in end_items.iteritems() if item_id != 'total'], reverse=True)
         selected_end_items = []
         i = 0
-        while (len(selected_end_items) <= NUM_END_ITEMS and i < len(normalized_end_items)):
+        while (len(selected_end_items) < NUM_END_ITEMS and i < len(normalized_end_items)):
             if normalized_end_items[i][0] < ITEM_PERCENT_REQUIRED:
                 break
             else:
-                selected_end_items.append({"id": normalized_end_items[i][1], "count": 1})
+                end_items_dict = OrderedDict([("id", normalized_end_items[i][1]), ("count", 1)])
+                selected_end_items.append(end_items_dict)
             i += 1
 
-        item_set['blocks'].append({
-            "type": "Common end items",
-            "items": selected_end_items
-        })
+        orderedDict['blocks'].append(OrderedDict([
+            ("type", "Common end items"),
+            ("items", selected_end_items)
+        ]))
 
         # Defence items
         defend_items = defence_items[champ_id][role]
@@ -106,18 +102,15 @@ for champ_id, champ in CHAMPIONS.iteritems():
                                                 and count / total_games_for_role_dmg_type * 100 > 5], reverse=True)
             selected_defence_items = [{"id": item_id, "count": 1} for _, item_id in filtered_defence_items]
             if len(selected_defence_items) > 0:
-                item_set['blocks'].append({
-                    "type": "Items against %s-heavy teams" % dmg_type,
-                    "items": selected_defence_items
-                })
-
-            
-        
+                orderedDict['blocks'].append(OrderedDict([
+                    ("type", "Items against %s-heavy teams" % dmg_type),
+                    ("items", selected_defence_items)
+                ]))
 
 
         filename = os.path.join("web", "data", "results", "%s_%s.json" % (champ.name, role))
         with open(filename, 'wb') as outfile:
-            json.dump(item_set, outfile, sort_keys=True,
+            json.dump(orderedDict, outfile, sort_keys=False,
                 indent=4, separators=(',', ': '))
 
         with open(os.path.join("web", "data", "results", "available_builds.json"), 'wb') as outfile:

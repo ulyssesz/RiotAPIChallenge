@@ -65,6 +65,8 @@ def normalize_item(item_id):
 
 		# Not final item
 		return None
+	elif item.gold["total"] < 500:
+		return None
 	else:
 		return item_id
 
@@ -130,9 +132,9 @@ def get_dmg_centers():
 DEFENCE_TAGS = {'ad': set(['Armor', 'SpellBlock', 'Health']), 'ap': set(['Armor', 'SpellBlock', 'Health']), 'mixed': set(['Armor', 'SpellBlock', 'Health'])}
 
 def get_dmg_type(stats):
-	centers = [[ 0.47502917,  0.4672588 ],
- 				[ 0.33950389,  0.61221167],
- 				[ 0.61494362,  0.32657223]]
+	centers = [[ 0.47382649,  0.46827455 ],
+ 				[ 0.34041952,  0.6114493],
+ 				[ 0.61256222,  0.32879833]]
  	center_labels = ['mixed', 'ap', 'ad']
 	ad, ap, true = stats
 	total = float(ad + ap + true)
@@ -266,9 +268,9 @@ def get_role_centers():
 
 
 def get_role_type(match):
-	centers = [[ 0.15324204,  0.0490604 ],
- 				[ 0.03374819,  0.3587345 ],
- 				[ 0.02343166,  0.00417037]]
+	centers = [[ 0.15075322,  0.04911325],
+ 				[ 0.03122957,  0.35335706],
+ 				[ 0.02262301,  0.00375224]]
 
  	center_labels = ['carry', 'jungle', 'support']
 
@@ -319,6 +321,8 @@ def get_role_items():
 					if item_id not in ITEMS:
 						continue
 					item_id = normalize_item(item_id)	
+					if item_id == 3170:
+						import pdb; pdb.set_trace()
 					if item_id == None:
 						continue
 
@@ -409,5 +413,5 @@ load_items()
 get_defence_items()
 
 
-# get_role_items()
+get_role_items()
 # get_starting_items()

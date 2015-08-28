@@ -8,6 +8,7 @@ import time
 import itertools
 
 KEY = '0d91fe97-9666-4e0b-86ff-e5c3a108db0d'
+ACCEPTED_QUEUE_TYPES = set(['RANKED_TEAM_5x5', 'RANKED_SOLO_5x5', 'NORMAL_5x5_BLIND'])
 RATE_LIMITS = (RateLimit(3000, 10), RateLimit(180000, 600))
 NUM_GAMES = 100
 
@@ -78,19 +79,31 @@ def get_games(start, count):
 		x = json.load(infile)
 	return x
 
+
 def filter_matches():
 	t = defaultdict(int)
+	ft = defaultdict(int)
 	for i in xrange(100):
 		print i
 		games = get_games(i * NUM_GAMES, NUM_GAMES)
+
+		filtered = [g for g in games if g['queueType'] in ACCEPTED_QUEUE_TYPES]
 		for g in games:
-			
 			t[g['queueType']] += 1
+
+		for f in filtered:
+			ft[f['queueType']] += 1
+
+		# filename = os.path.join("data2", '%s-%d.json' % (REGION, i * 100))
+		# with open(filename, 'wb') as outfile:
+		# 	json.dump(filtered, outfile)
+
 	print t
+	print ft
 
 # get_player_ids()
 # get_match_ids()
-# filter_matches()
+filter_matches()
 
 
 
