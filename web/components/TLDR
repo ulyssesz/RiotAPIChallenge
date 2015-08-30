@@ -1,0 +1,30 @@
+TLDR
+- Analyze ~100,000 matches
+- Figure out what the best build for different roles per champion
+- Determine what to build against ad/ap heavy teams
+
+
+==Analyze ~100,000 matches
+- Downloading
+    - For every master and up player in EUW/NA, I searched for their most recent 15 games and selected the ones that were blind pick / rank on Summoner's Rift. 
+    - Found 50,000 games each.
+
+==Figure out what the best build for different roles per champion
+- Determine role
+    - Since the match data didn't have a clear role for every player, I decided to determine the role based on creep score and jungle creep score.
+    - Since game length affects cs count, I normalized all the values by dividing each person's cs by his/her team's total cs.
+    - Then I used K Means clustering to determine 3 categories, carries (solo lane + bot carry), jungler and support
+    - This is the resulting graph [insert graph]
+
+- 
+
+
+
+
+1. Download matches
+2. Look through the recent match history of master/challengers in EUW/NA
+    Found ~50,000 games each
+3. Identify the role for each champion in a game
+4. Determine damage output by type 
+4. Identify the popular items for each champion in the suitable roles
+5. Identify the defence items bought when against comps that are heavily ap/ad

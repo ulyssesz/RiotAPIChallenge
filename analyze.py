@@ -13,6 +13,8 @@ NUM_GAMES = 100
 
 BOOTS = set([3006, 3009, 3020, 3047, 3111, 3117, 3158])
 CONSUMABLES = set(range(3340, 3343) + range(3361, 3365) + [2043, 2044, 2003, 2004]) 
+ENCHANTMENT_MAP = {3930: 3710, 3931: 3718, 3932: 3722, 3933: 3726} # Sated devourers are mapped to the corresponding devourer
+EXEMPT_NON_FINAL_ITEMS = set([3710, 3718, 3722, 3726]) # Devourer items
 
 
 def convert(dictionary):
@@ -60,6 +62,10 @@ def normalize_item(item_id):
 		return None
 	elif item_id in CONSUMABLES:
 		return None
+	elif item_id in ENCHANTMENT_MAP:
+		return ENCHANTMENT_MAP[item_id]
+	elif item_id in EXEMPT_NON_FINAL_ITEMS:
+		return item_id
 	elif len(item.into) > 0:
 
 
@@ -408,10 +414,12 @@ def get_starting_items():
 
 load_champions()
 load_items()
-# get_dmg_centers()
-# get_role_centers()
-get_defence_items()
+if __name__ == "__main__":
+	
+	# get_dmg_centers()
+	# get_role_centers()
+	# get_defence_items()
 
 
-get_role_items()
+	get_role_items()
 # get_starting_items()

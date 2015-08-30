@@ -6,6 +6,7 @@ ROLES = ['support', 'carry', 'jungle']
 DMG_TYPES = ['ad', 'ap']
 CHAMPIONS = {}
 ROLE_PERCENT_REQUIRED = 5
+ROLE_COUNT_REQUIRED = 20
 NUM_END_ITEMS = 8
 ITEM_PERCENT_REQUIRED = 2
 
@@ -35,13 +36,16 @@ def extract_champ_info():
                 indent=4, separators=(',', ': '))
 
 
+with open(os.path.join("output", "games_by_role.json")) as infile:
+    games_by_role = json.load(infile)
+
 with open(os.path.join("output", "starting_items.json")) as infile:
     starting_items = json.load(infile)
 
 with open(os.path.join("output", "defence_items.json")) as infile:
     defence_items = json.load(infile)
 
-with open(os.path.join("output", "ending_items.json")) as infile:
+with open(os.path.join("output", "new_end_items2.json")) as infile:
     ending_items = json.load(infile)
 
 load_champions()
@@ -51,13 +55,14 @@ extract_champ_info()
 available_builds = {}
 for champ_id, champ in CHAMPIONS.iteritems():
     available_builds[champ.name] = []
-    total_games = float(ending_items[champ_id]['total'])
+    total_games = float(games_by_role[champ_id]['total'])
     for role in ROLES:
+        total_games_in_role = games_by_role[champ_id].get(role, 0)
         
-        total_games_in_role = ending_items[champ_id][role]['total']
-        if total_games_in_role / float(total_games) * 100 < ROLE_PERCENT_REQUIRED:
+        if total_games_in_role / float(total_games) * 100 < ROLE_PERCENT_REQUIRED or total_games_in_role < ROLE_COUNT_REQUIRED:
             continue
-
+        if champ_id == '6' and role == "support":
+            print total_games_in_role, total_games
         available_builds[champ.name].append(role)
 
         orderedDict = OrderedDict()
@@ -74,17 +79,18 @@ for champ_id, champ in CHAMPIONS.iteritems():
 
         # Ending items
         end_items = ending_items[champ_id][role]
-        normalized_end_items = sorted([(count / total_games_in_role * 100, item_id) for item_id, count in end_items.iteritems() if item_id != 'total'], reverse=True)
-        selected_end_items = []
-        i = 0
-        while (len(selected_end_items) < NUM_END_ITEMS and i < len(normalized_end_items)):
-            if normalized_end_items[i][0] < ITEM_PERCENT_REQUIRED:
-                break
-            else:
-                end_items_dict = OrderedDict([("id", normalized_end_items[i][1]), ("count", 1)])
-                selected_end_items.append(end_items_dict)
-            i += 1
+        # normalized_end_items = sorted([(count / total_games_in_role * 100, item_id) for item_id, count in end_items.iteritems() if item_id != 'total'], reverse=True)
+        # selected_end_items = []
+        # i = 0
+        # while (len(selected_end_items) < NUM_END_ITEMS and i < len(normalized_end_items)):
+        #     if normalized_end_items[i][0] < ITEM_PERCENT_REQUIRED:
+        #         break
+        #     else:
+        #         end_items_dict = OrderedDict([("id", normalized_end_items[i][1]), ("count", 1)])
+        #         selected_end_items.append(end_items_dict)
+        #     i += 1
 
+        selected_end_items = [OrderedDict([("id", item_id), ("count", 1)]) for item_id in end_items]
         orderedDict['blocks'].append(OrderedDict([
             ("type", "Common end items"),
             ("items", selected_end_items)
