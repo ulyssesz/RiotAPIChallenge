@@ -2,24 +2,15 @@
 <html>
     <head>
         <title>Building like the Pros</title>
-        <link rel="stylesheet" type="text/css" href="index.css">
+        <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+        <link rel="import" href="components/pageComponent.html">
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/styles/default.min.css">
+        <link rel="stylesheet" href="index.css">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
     </head>
     <body>
-        <div id="background">
-            <div id="champions">
-            </div>
-            <div id="item-set">
-                <div class="item-row">
-                    <div class="row-name"> 
-                        Starting items
-                    </div>
-                    <div class="items">
-                        <img class="item"/>
-                        
-                    </div>
-                </div>
-            </div>
-        </div>
+        <page-component></page-component>
         <script src="js/jquery-1.10.2.js"></script>
         <script type="text/javascript" src="js/index.js"></script>
     </body>
