@@ -1,6 +1,6 @@
 import os.path
 import json
-from riotwatcher import RiotWatcher, RateLimit, EUROPE_WEST, NORTH_AMERICA, LoLException
+from riotwatcher import RiotWatcher, RateLimit, EUROPE_WEST, NORTH_AMERICA, LoLException, KOREA
 from collections import defaultdict
 import operator
 from trueskill import Rating, TrueSkill, rate_1vs1
@@ -19,15 +19,11 @@ watcher = RiotWatcher(KEY, limits = RATE_LIMITS)
 	
 
 def get_match_ids():
-	path = os.path.join("BILGEWATER", "%s.json" % REGION)
-	with open(path) as infile:
-		x = json.load(infile)
-	x = [(NORTH_AMERICA, y) for y in x]
-
-	with open(os.path.join("data", "pro_matches_EUW.json")) as infile:
-		y = json.load(infile)
-	y = [(EUROPE_WEST, t) for t in y]
-	x.extend(y)
+	x = []
+	for r, s in [('KR', KOREA), ('NA', NORTH_AMERICA), ('EUW', EUROPE_WEST)]:
+		with open(os.path.join("data", "pro_matches_%s.json" % r)) as infile:
+			y = json.load(infile)	
+		x.extend([(s, c) for c in y])	
 	return x
 
 def save_data(filename, data):
@@ -145,7 +141,7 @@ match_ids = get_match_ids()
 # for s in sorted_counts:
 # 	print s
 
-for i in xrange(60, 80):
+for i in xrange(80, 120):
 	print "set", i
 	download_matches(match_ids, i * NUM_GAMES)
 

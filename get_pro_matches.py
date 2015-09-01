@@ -1,20 +1,21 @@
 import os.path
 import json
-from riotwatcher import RiotWatcher, RateLimit, EUROPE_WEST, NORTH_AMERICA
+from riotwatcher import RiotWatcher, RateLimit, EUROPE_WEST, NORTH_AMERICA, KOREA
 from collections import defaultdict
 import operator
 from trueskill import Rating, TrueSkill, rate_1vs1
 import time
 import itertools
+import random
 
 KEY = '0d91fe97-9666-4e0b-86ff-e5c3a108db0d'
 ACCEPTED_QUEUE_TYPES = set(['RANKED_TEAM_5x5', 'RANKED_SOLO_5x5', 'NORMAL_5x5_BLIND'])
 RATE_LIMITS = (RateLimit(3000, 10), RateLimit(180000, 600))
 NUM_GAMES = 100
 
-REGION = "PRO"
+REGION = "KR"
 
-watcher = RiotWatcher(KEY, limits = RATE_LIMITS, default_region=EUROPE_WEST)
+watcher = RiotWatcher(KEY, limits = RATE_LIMITS, default_region=KOREA)
 
 def get_chunk(iterable, chunk_size):
     result = []
@@ -54,24 +55,43 @@ def get_match_ids():
 		i += 1
 		print "Players checked: %d" % (i * 10)
 		for p_id in chunk:
-			success = False
-			while not success:
-				try:
-					games = watcher.get_match_history(p_id, begin_index=0, end_index=15)
-					success = True
-				except:
-					print "Fail"
-					time.sleep(0.25)
-					
+			begin_index = 0
+			end_index = 15
+			while True:
+				success = False
+				fail_count = 0
 
-			for g in games['matches']:
-				if not g['matchVersion'].startswith('5.15'):
-					continue
-				match_ids.add(g['matchId'])
+				while not success:
+					try:
+						games = watcher.get_match_history(p_id, begin_index=begin_index, end_index=end_index, ranked_queues="RANKED_SOLO_5x5")
+						success = True
+					except:
+						fail_count += 1
+						if fail_count >= 2:
+							break
+						print "Fail"
+						time.sleep(0.25)
+				too_old = False
+				if not success or 'matches' not in games:
+					break
+
+				for g in games['matches']:
+					if not g['matchVersion'].startswith('5.16'):
+						too_old = True
+						continue
+					match_ids.add(g['matchId'])
+
+				if too_old or end_index >= 30:
+					break
+				else:
+					begin_index += 15
+					end_index += 15
 		print len(match_ids)
+	match_ids = list(match_ids)
+	random.shuffle(match_ids)
 
 	with open(os.path.join("data", "pro_matches_%s.json" % REGION), 'wb') as outfile:
-		json.dump(list(match_ids), outfile)
+		json.dump(match_ids, outfile)
 
 def get_games(start, count):
 	filename = os.path.join("data", '%s-%d.json' % (REGION, start))
@@ -102,8 +122,8 @@ def filter_matches():
 	print ft
 
 # get_player_ids()
-# get_match_ids()
-filter_matches()
+get_match_ids()
+# filter_matches()
 
 
 

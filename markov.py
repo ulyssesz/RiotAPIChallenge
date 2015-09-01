@@ -1,9 +1,10 @@
 from analyze import *
 from collections import defaultdict
+import itertools
 
 def games_by_role():
     output = defaultdict(lambda: defaultdict(int))
-    for i in xrange(100):
+    for i in xrange(120):
         print i
         games = get_games(i * NUM_GAMES, NUM_GAMES)
         for g in games:
@@ -31,7 +32,8 @@ def games_by_role():
 def markov():
     data = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(int)))) # champ: role: chain: option: count
     # avg_pos = defaultdict(lambda: defaultdict(int))
-    for i in xrange(100):
+    
+    for i in xrange(120):
         print i
         games = get_games(i * NUM_GAMES, NUM_GAMES)
         for g in games:
@@ -52,8 +54,11 @@ def markov():
             
             for p in g['participants']:
                 items_player_bought = items_bought[p['participantId']]
-                for i in xrange(2, len(items_player_bought)):
-                    data[p['championId']][roles[p['participantId']]][tuple(items_player_bought[i-2:i])][items_player_bought[i]] += 1
+
+                for key_len in xrange(2, len(items_player_bought)):
+                    for i in xrange(key_len, len(items_player_bought)):
+                        key = tuple(items_player_bought[:i-1])
+                        data[p['championId']][roles[p['participantId']]][key][items_player_bought[i]] += 1    
                     # avg_pos[items_bought[i]]["sum"] += (i - 1)
                     # avg_pos[items_bought[i]]["total"] += 1
     
@@ -63,18 +68,43 @@ def markov():
             seq = [None, None]
             print "Champ: %s \t Role: %s" % (CHAMPIONS[champ_id].name, role)
 
+            # while True:
+            #     l = len(seq)
+            #     keys = [(seq[l-2], seq[l-1]), (seq[l-1], seq[l-2])]
+            #     if l >= 4:
+            #         keys.append((seq[l-3], seq[l-2]))
+            #         keys.append((seq[l-2], seq[l-3]))
+            #     choices = defaultdict(int)
+            #     for key in keys:
+            #         for item_id, count in chains.get(key, {}).iteritems():
+            #             choices[item_id] += count
+            #     sorted_choices = sorted([(v,k) for k,v in choices.iteritems()], reverse=True)
+                
+            #     if len(seq) - 2 < 6:
+            #         found_item = False
+            #         for count, choice in sorted_choices:
+            #             if choice not in seq:
+            #                 found_item = True
+            #                 seq.append(choice)
+            #                 break
+            #         if found_item:
+            #             continue
+                        
+            #     output[champ_id][role] = seq[2:]
+            #     for item_id in seq[2:]:
+            #         item = ITEMS[item_id]
+            #         print item.name
+            #     break
+
             while True:
                 l = len(seq)
-                keys = [(seq[l-2], seq[l-1]), (seq[l-1], seq[l-2])]
-                if l >= 4:
-                    keys.append((seq[l-3], seq[l-2]))
-                    keys.append((seq[l-2], seq[l-3]))
                 choices = defaultdict(int)
-                for key in keys:
+                for key_len in xrange(2, l + 1):
+                    key = tuple(seq[:key_len])
                     for item_id, count in chains.get(key, {}).iteritems():
                         choices[item_id] += count
+
                 sorted_choices = sorted([(v,k) for k,v in choices.iteritems()], reverse=True)
-                
                 if len(seq) - 2 < 6:
                     found_item = False
                     for count, choice in sorted_choices:
@@ -84,12 +114,12 @@ def markov():
                             break
                     if found_item:
                         continue
-                        
                 output[champ_id][role] = seq[2:]
                 for item_id in seq[2:]:
                     item = ITEMS[item_id]
                     print item.name
                 break
+
 
             # sorted_pos = [(v["sum"] / float(v["total"]), item_id, v["total"]) for item_id ,v in avg_pos.iteritems()]
             # sorted_pos.sort()
@@ -105,10 +135,11 @@ def hash_by_index(text):
     return {text[i]: i for i in xrange(len(text))}
 
 
-def end_items():
-    output = defaultdict(lambda: defaultdict(dict))
+def get_build_orders():
+    
     data = defaultdict(lambda: defaultdict(list))
-    for i in xrange(100):
+    allowed = set([])
+    for i in xrange(120):
         print i
         games = get_games(i * NUM_GAMES, NUM_GAMES)
         for g in games:
@@ -125,11 +156,34 @@ def end_items():
                         if item_id == None:
                             continue
                         items_bought[event['participantId']].append(item_id)
+                    elif event['eventType'] == 'ITEM_UNDO':
+                        item_id = event["itemBefore"]
+                        if item_id in items_bought[event['participantId']]:
+                            items_bought[event['participantId']].remove(item_id)
+                    elif event['eventType'] == 'ITEM_SOLD':
+                        item_id = event["itemId"]
+                        if item_id in items_bought[event['participantId']]:
+                            items_bought[event['participantId']].remove(item_id)
+
             for p in g['participants']:
                 champ_id = p['championId']
+
+                items_player_bought = items_bought[p['participantId']]
+                for comb in itertools.combinations(items_player_bought, 2):
+                    allowed.add(tuple(sorted(comb)))
+
                 data[champ_id][roles[p['participantId']]].append(items_bought[p['participantId']])
 
+    with open(os.path.join("output", "build_orders.json"), 'wb') as outfile:
+        json.dump(data, outfile)
+
+def end_items():
+    output = defaultdict(lambda: defaultdict(dict))
+    with open(os.path.join("output", "build_orders.json")) as infile:
+        data = json.load(infile)
+
     for champ_id, roles_dict in data.iteritems():
+        champ_id = int(champ_id)
         for role, item_seqs in roles_dict.iteritems():
             curr_seq = []
             remaining_seqs = item_seqs[:]
@@ -139,35 +193,49 @@ def end_items():
                 for seq in remaining_seqs:
                     x = set(curr_seq)
                     y = set(seq)
-                    if x.issubset(y):
-                        new_remaining_seqs.append(seq)
+                    new_remaining_seqs.append(seq)
 
-                        x_hash = hash_by_index(curr_seq)
-                        y_hash = hash_by_index(seq)
+                    x_hash = hash_by_index(curr_seq)
+                    y_hash = hash_by_index(seq)
 
-                        last_index = -1 # Find index of the rightmost char in seq that is part of curr_seq
-                        for c in x_hash:
-                            if y_hash[c] > last_index:
-                                last_index = y_hash[c]
+                    missing = list(x.difference(y))
+                    for i in xrange(len(missing)):
+                        y_hash[missing[i]] = len(seq) + i
 
-                        
-                        for item_id in y.difference(x):
-                            weight = 1.0
-                            if y_hash[item_id] > last_index:
-                                # Item occurs after
-                                weight /= (2 ** (y_hash[item_id] - last_index - 1))
-                            else:
-                                # Item purchase occurs before at least one
-                                for c in x_hash:
-                                    if y_hash[item_id] < y_hash[c]:
-                                        weight /= 2
-                            next_item[item_id] += weight
+                    last_index = -1 # Find index of the rightmost char in seq that is part of curr_seq
+                    for c in x_hash:
+                        if y_hash[c] > last_index:
+                            last_index = y_hash[c]
+
+                    
+                    
+                    for item_id in y.difference(x):
+                        weight = 1.0
+                        if y_hash[item_id] > last_index:
+                            # Item occurs after
+                            weight /= (2 ** (y_hash[item_id] - last_index - 1))
+                        else:
+                            # Item purchase occurs before at least one
+                            for c in x_hash:
+                                if y_hash[item_id] < y_hash[c]:
+                                    weight /= 2
+                        next_item[item_id] += weight
                 sorted_items = sorted([(count, item_id) for item_id, count in next_item.iteritems()], reverse=True)
                 if len(sorted_items) == 0:
                     break
-                curr_seq.append(sorted_items[0][1])
-                remaining_seqs = new_remaining_seqs
 
+                found_item = False
+                for count, item_id in sorted_items:
+                    if item_id in BOOTS and len(set(curr_seq).intersection(BOOTS)) >= 1:
+                        continue # Can't have > 1 boots
+                    else:
+                        curr_seq.append(item_id)
+                        found_item = True
+                        break
+                if not found_item:
+                    break
+                
+                remaining_seqs = new_remaining_seqs
             print "Champ: %s \t Role: %s" % (CHAMPIONS[champ_id].name, role)
             print curr_seq
 
@@ -177,6 +245,7 @@ def end_items():
             print
             print
             output[champ_id][role] = curr_seq
+
 
     with open(os.path.join("output", "new_end_items2.json"), 'wb') as outfile:
         json.dump(output, outfile)
@@ -188,4 +257,5 @@ def end_items():
 if __name__ == "__main__":
     # games_by_role()
     # markov()
+    get_build_orders()
     end_items()

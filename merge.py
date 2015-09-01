@@ -90,7 +90,7 @@ for champ_id, champ in CHAMPIONS.iteritems():
         #         selected_end_items.append(end_items_dict)
         #     i += 1
 
-        selected_end_items = [OrderedDict([("id", item_id), ("count", 1)]) for item_id in end_items]
+        selected_end_items = [OrderedDict([("id", str(item_id)), ("count", 1)]) for item_id in end_items]
         orderedDict['blocks'].append(OrderedDict([
             ("type", "Common end items"),
             ("items", selected_end_items)

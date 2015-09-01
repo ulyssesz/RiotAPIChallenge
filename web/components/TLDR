@@ -1,13 +1,14 @@
 TLDR
 - Analyze ~100,000 matches
-- Figure out what the best build for different roles per champion
+- Figure out what the popular builds for different roles per champion
 - Determine what to build against ad/ap heavy teams
+- Determine starting items
 
 
-==Analyze ~100,000 matches
+==Analyze 120,000 matches
 - Downloading
-    - For every master and up player in EUW/NA, I searched for their most recent 15 games and selected the ones that were blind pick / rank on Summoner's Rift. 
-    - Found 50,000 games each.
+    - For every master and up player in EUW/NA/KR, I searched for their most recent 30 solo q games and filtered the ones for patch 5.16
+    - Found 3514 games in NA (of 970 players), 5212 in EUW (of 1111 players) and 3557 in KR (of 1085 players)
 
 ==Figure out what the best build for different roles per champion
 - Determine role
@@ -16,7 +17,38 @@ TLDR
     - Then I used K Means clustering to determine 3 categories, carries (solo lane + bot carry), jungler and support
     - This is the resulting graph [insert graph]
 
-- 
+- Determine build path
+    - Initial attempts
+        - Pure Popularity
+            - Initial attempt was to just tally up which items were picked the most per champion per role. As predicted, this doens't really work really well, because it doesn't really account for synergy / anti-synergy between items. There is also no notion of sequential order, i.e. the order in which the items should be bought.
+        - Markov Chains
+            - Another attempt was to use markov chains of length 2.  Essentially, the next item was determined by what is most picked based the previous two purchases. The downside of this is that after the initial first and second buy, the algorithm tunnel visions onto a small subset of item choices. This can be attributed to a small dataset.
+    - Best attempt 
+        - The final attempt was a mix of the previous two. It utilized the popularilty of items and accounted for the synergy of items. The heuristic was to add a value to each item based on its relative position with respect to the current items selected so far.
+        - In other words
+            - Suppose we already have two items selected in our build X, and is looking for the third. For every item in every build order, if it's not already in X, we assign a value ot it. It starts off at a value of at a constant Y and will be reduced based on a number of factors
+            - Whether it was bought after the items in X
+            - whether it was bought before the items in X
+            - The relative position with respect to items of X
+        - This produced decent results and provides a sequential build order. (i.e. You can build the items from left to right)
+
+
+== Determing starting items
+- Determine an initial buy
+    - Iterated through events in the first 2 minutes of each game
+- Picking the initial buy
+    - For each champion and role, the most popular buy was picked.
+
+
+== Determining situational buys
+- Determining damage composition
+    - Preprocessing
+        - For every team composition, the total ad/ap/true damage done to champions was computed and then normalized against the total damage done to champions
+    - Determining whether a composition is ap or ad heavy
+        - Again, using K Means clustering, 3 categories were determined. The three centers were
+    - Identifying items good against ap/ad heavy compositions
+        - Given each team composition, the items built by the other team were tallied up
+        - If an item was picked more against ad heavy composition than in neutral and ap heavy compositions, it'd be selected. And vice versa against ap heavy compositions.
 
 
 

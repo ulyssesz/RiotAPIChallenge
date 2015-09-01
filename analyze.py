@@ -13,8 +13,10 @@ NUM_GAMES = 100
 
 BOOTS = set([3006, 3009, 3020, 3047, 3111, 3117, 3158])
 CONSUMABLES = set(range(3340, 3343) + range(3361, 3365) + [2043, 2044, 2003, 2004]) 
-ENCHANTMENT_MAP = {3930: 3710, 3931: 3718, 3932: 3722, 3933: 3726} # Sated devourers are mapped to the corresponding devourer
-EXEMPT_NON_FINAL_ITEMS = set([3710, 3718, 3722, 3726]) # Devourer items
+
+# Sated devourers are mapped to the corresponding devourer, sightstone, manamune, archangel
+ENCHANTMENT_MAP = {3930: 3710, 3931: 3718, 3932: 3722, 3933: 3726, 2045: 2049, 3042: 3004, 3040: 3003}
+EXEMPT_NON_FINAL_ITEMS = set([3710, 3718, 3722, 3726, 2049, 3004, 3003]) # Devourer items, sightstone
 
 
 def convert(dictionary):
@@ -138,9 +140,9 @@ def get_dmg_centers():
 DEFENCE_TAGS = {'ad': set(['Armor', 'SpellBlock', 'Health']), 'ap': set(['Armor', 'SpellBlock', 'Health']), 'mixed': set(['Armor', 'SpellBlock', 'Health'])}
 
 def get_dmg_type(stats):
-	centers = [[ 0.47382649,  0.46827455 ],
- 				[ 0.34041952,  0.6114493],
- 				[ 0.61256222,  0.32879833]]
+	centers = [[ 0.48269258,  0.45876403 ],
+ 				[ 0.34298586,  0.60917522],
+ 				[ 0.62638547,  0.31306683]]
  	center_labels = ['mixed', 'ap', 'ad']
 	ad, ap, true = stats
 	total = float(ad + ap + true)
@@ -235,7 +237,7 @@ def get_defence_items():
 
 def get_role_centers():
 	data = []
-	for i in xrange(100):
+	for i in xrange(120):
 		print i
 		games = get_games(i * NUM_GAMES, NUM_GAMES)
 		for g in games:
@@ -274,9 +276,9 @@ def get_role_centers():
 
 
 def get_role_type(match):
-	centers = [[ 0.15075322,  0.04911325],
- 				[ 0.03122957,  0.35335706],
- 				[ 0.02262301,  0.00375224]]
+	centers = [[ 0.15063603,  0.05032667],
+ 				[ 0.03084382,  0.34990775],
+ 				[ 0.02345441,  0.00376929]]
 
  	center_labels = ['carry', 'jungle', 'support']
 
@@ -356,6 +358,13 @@ def get_role_items():
 	with open(os.path.join("output", "ending_items.json"), 'wb') as outfile:
 		json.dump(data, outfile)
 
+def normalize_start_item(item_id):
+	if item_id == 2010:
+		return 2003
+	else:
+		return item_id
+
+
 def get_starting_items():
 	data = defaultdict(lambda: {'jungle': defaultdict(lambda: 0.01), 'support': defaultdict(lambda: 0.01), 'carry': defaultdict(lambda: 0.01), 'total': 0.01})
 	for i in xrange(100):
@@ -375,11 +384,14 @@ def get_starting_items():
 					continue
 				for event in frame['events']:
 					if event['eventType'] == 'ITEM_PURCHASED':
-						items_bought[event['participantId']][event['itemId']] += 1
+						item_id = normalize_start_item(event['itemId'])
+						items_bought[event['participantId']][item_id] += 1
 					elif event['eventType'] == 'ITEM_UNDO':
-						items_bought[event['participantId']][event['itemBefore']] -= 1
+						item_id = normalize_start_item(event['itemBefore'])
+						items_bought[event['participantId']][item_id] -= 1
 					elif event['eventType'] == 'ITEM_SOLD':
-						items_bought[event['participantId']][event['itemId']] -= 1
+						item_id = normalize_start_item(event['itemId'])
+						items_bought[event['participantId']][item_id] -= 1
 
 			for participant_id, items in items_bought.iteritems():
 				role = roles[participant_id]
@@ -415,11 +427,11 @@ def get_starting_items():
 load_champions()
 load_items()
 if __name__ == "__main__":
-	
+	pass
 	# get_dmg_centers()
 	# get_role_centers()
 	# get_defence_items()
 
 
-	get_role_items()
-# get_starting_items()
+	# get_role_items()
+	get_starting_items()

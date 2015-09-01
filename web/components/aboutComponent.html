@@ -1,0 +1,101 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+
+<dom-module id="about-component">
+    <style>
+        :host {
+            display: block;
+            width: 800px;
+            vertical-align: top;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        my-card {
+            --paper-card: {
+                margin: 50px;
+                
+            };
+        }     
+
+
+        h1, h2, div {
+            font-family: 'Roboto', sans-serif;
+            font-size: 14px;
+        }
+
+        h1 { font-size: 32px; }
+        h2 { font-size: 24px; }
+        h3 { font-size: 19px; }
+        h4 { font-size: 16px; }
+        h5 { font-size: 13px; }
+        h6 { font-size: 11px; }
+
+        
+
+    </style>
+    <template>
+        <my-card class="champion-list" elevation="3">
+            <div class="card-content">
+                <h1>TL;DR</h1>
+                <div>• Analyze ~100,000 matches</div>
+                <div>• Figure out what the popular builds for different roles per champion</div>
+                <div>• Determine starting items</div>
+                <div>• Determine situational buys</div>
+                <h2>Analyze 120,000 matches</h2>
+                <h3>Downloading</h3>
+                <div>For every master and up player in EUW/NA/KR, I searched for their most recent 30 solo q games and filtered the ones for patch 5.16</div>
+                <div>• Found 3514 games in NA (of 970 players), 5212 in EUW (of 1111 players) and 3557 in KR (of 1085 players)</div>
+
+                <h2>Figure out what the best build for different roles per champion</h2>
+                <h3>Determine role</h3>
+                <div> Since the match data didn't have a clear role for every player, I decided to determine the role based on creep score and jungle creep score. </div>
+                <div>Since game length affects cs count, I normalized all the values by dividing each person's cs by his/her team's total cs.</div>
+                <div>Then I used K Means clustering to determine 3 categories, carries (solo lane + bot carry), jungler and support</div>
+                <div>This is the resulting graph [insert graph]</div>
+
+                <h2>Determine build path</h2>
+                <h3>Initial attempts</h3>
+                <h4>Pure Popularity</h4>
+                <div> Initial attempt was to just tally up which items were picked the most per champion per role. As predicted, this doens't really work really well, because it doesn't really account for synergy / anti-synergy between items. There is also no notion of sequential order, i.e. the order in which the items should be bought.</div>
+                <h4> Markov Chains</h4>
+                <div> Another attempt was to use markov chains of length 2.  Essentially, the next item was determined by what is most picked based the previous two purchases. The downside of this is that after the initial first and second buy, the algorithm tunnel visions onto a small subset of item choices. This can be attributed to a small dataset.</div>
+                <h3>Best attempt</h3>
+                <div> The final attempt was a mix of the previous two. It utilized the popularilty of items and accounted for the synergy of items. The heuristic was to add a value to each item based on its relative position with respect to the current items selected so far.</div>
+                <h4> In other words</h4>
+                <div> Suppose we already have two items selected in our build X, and is looking for the third. For every item in every build order, if it's not already in X, we assign a value ot it. It starts off at a value of at a constant Y and will be reduced based on a number of factors</div>
+                <div> Whether it was bought after the items in X</div>
+                <div> whether it was bought before the items in X</div>
+                <div> The relative position with respect to items of X</div>
+                <div> This produced decent results and provides a sequential build order. (i.e. You can build the items from left to right)</div>
+
+
+                <h2> Determing starting items</h2>
+                    <h3> Determine an initial buy</h3>
+                        <div>Iterated through events in the first 2 minutes of each game</div>
+                    <h3>Picking the initial buy</h3>
+                        <div>For each champion and role, the most popular buy was picked.</div>
+
+
+                <h2> Determining situational buys</h2>
+                <h3>Determining damage composition</h3>
+                    <h4> Preprocessing</h4>
+                        <div>For every team composition, the total ad/ap/true damage done to champions was computed and then normalized against the total damage done to champions</div>
+                    <h4> Determining whether a composition is ap or ad heavy</h4>
+                        <div> Again, using K Means clustering, 3 categories were determined. </div>
+                    <h4>Identifying items good against ap/ad heavy compositions</h4>
+                        <div>Given each team composition, the items built by the other team were tallied up</div>
+                        <div>If an item was picked more against ad heavy composition than in neutral and ap heavy compositions, it'd be selected. And vice versa against ap heavy compositions.</div>
+
+            </div>
+        </my-card>
+    </template>
+    <script>
+        Polymer({
+            is: 'about-component'
+            
+        });
+    </script>
+</dom-module>
